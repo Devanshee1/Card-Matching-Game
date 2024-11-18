@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Card Matching Game</title>
 <style>
+    /* Center the game board in the viewport */
     body {
         display: flex;
         justify-content: center;
@@ -13,12 +14,16 @@
         margin: 0;
         font-family: Arial, sans-serif;
     }
+
+    /* Define the game board as a grid with 3 columns */
     .game-board {
         display: grid;
         grid-template-columns: repeat(3, 250px);
         gap: 20px;
         max-width: 600px;
     }
+
+    /* Style each card with size, color, and hover effect */
     .card {
         display: flex;
         justify-content: center;
@@ -29,72 +34,113 @@
         cursor: pointer;
         transition: background-color 0.3s;
     }
+
+    /* Style for flipped cards */
     .card.flipped {
         background-color: #fff;
     }
 </style>
 </head>
 <body>
+<!-- Container for the game board -->
 <div class="game-board"></div>
 <script>
-    // hashmap / randomize.. / 50%
+    // Array of numbers (pairs of matching numbers for the game)
     const numbers = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8];
+
+    // Array to keep track of currently flipped cards
     let flippedCards = [];
+
+    // Array to store matched cards
     let matchedCards = [];
+
+    // Boolean to prevent flipping more cards during animations
     let canFlip = true;
 
+    /**
+     * Creates a card element with the given number.
+     * @param {number} number - The number to assign to the card.
+     * @returns {HTMLElement} The card element.
+     */
     function createCard(number) {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.dataset.number = number;
-        card.textContent = '?';
-        card.addEventListener('click', flipCard);
+        const card = document.createElement('div'); // Create a div element for the card
+        card.classList.add('card'); // Add the 'card' class for styling
+        card.dataset.number = number; // Store the card's number in a data attribute
+        card.textContent = '?'; // Display a '?' as the default content
+        card.addEventListener('click', flipCard); // Add an event listener for clicks
         return card;
     }
 
+    /**
+     * Handles flipping a card when clicked.
+     */
     function flipCard() {
+        // Prevent flipping if the game is in a paused state, 
+        // if the card is already flipped, or if the card is already matched
         if (!canFlip || flippedCards.length >= 2 || this.classList.contains('flipped') || matchedCards.includes(this)) {
             return;
         }
+
+        // Flip the card by adding the 'flipped' class and revealing its number
         this.classList.add('flipped');
         this.textContent = this.dataset.number;
+
+        // Add the flipped card to the list of currently flipped cards
         flippedCards.push(this);
 
-        // counter == 2
+        // If two cards are flipped, check for a match
         if (flippedCards.length === 2) {
             checkMatch();
         }
     }
 
+    /**
+     * Checks if the two flipped cards match.
+     */
     function checkMatch() {
-        canFlip = false;
+        canFlip = false; // Temporarily disable card flipping during the check
+
         setTimeout(() => {
-            const [card1, card2] = flippedCards;
+            const [card1, card2] = flippedCards; // Get the two flipped cards
             if (card1.dataset.number === card2.dataset.number) {
+                // If the cards match, add them to the matched list
                 matchedCards.push(card1, card2);
+
+                // Check if all cards are matched
                 if (matchedCards.length === numbers.length) {
-                    alert('Congratulations! You won!');
+                    alert('Congratulations! You won!'); // Display a winning message
                 }
             } else {
+                // If the cards don't match, flip them back
                 card1.classList.remove('flipped');
                 card2.classList.remove('flipped');
                 card1.textContent = '?';
                 card2.textContent = '?';
             }
+
+            // Reset flipped cards and re-enable card flipping
             flippedCards = [];
             canFlip = true;
-        }, 1000);
+        }, 1000); // Delay for better user experience
     }
 
+    /**
+     * Initializes the game by shuffling the numbers and creating the cards.
+     */
     function initGame() {
-        const gameBoard = document.querySelector('.game-board');
+        const gameBoard = document.querySelector('.game-board'); // Select the game board container
+
+        // Shuffle the numbers array randomly
         numbers.sort(() => Math.random() - 0.5);
+
+        // Create and append cards to the game board
         numbers.forEach(number => {
             const card = createCard(number);
             gameBoard.appendChild(card);
         });
     }
 
+    // Start the game when the page loads
     initGame();
 </script>
 </body>
